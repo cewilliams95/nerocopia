@@ -1,18 +1,21 @@
 <?php
 
-namespace Tests\Feature;
-
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-class ExampleTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_returns_a_successful_response()
-    {
-        $response = $this->get(route('home'));
+test('guests are redirected to login from home', function () {
+    $response = $this->get(route('home'));
 
-        $response->assertOk();
-    }
-}
+    $response->assertRedirect(route('login'));
+});
+
+test('authenticated users are redirected to recipes from home', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $response = $this->get(route('home'));
+
+    $response->assertRedirect(route('recipes.index'));
+});
