@@ -43,6 +43,20 @@ export default function RecipesShow({ recipe, changes }: ShowProps) {
 
                 <p className="text-muted-foreground">{recipe.description}</p>
 
+                {recipe.original_source && (
+                    <p className="text-sm text-muted-foreground">
+                        Source:{' '}
+                        <a
+                            href={recipe.original_source}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4 hover:text-foreground"
+                        >
+                            {new URL(recipe.original_source).hostname}
+                        </a>
+                    </p>
+                )}
+
                 <div className="grid gap-8 md:grid-cols-2">
                     <section>
                         <h2 className="mb-3 font-semibold">Ingredients</h2>

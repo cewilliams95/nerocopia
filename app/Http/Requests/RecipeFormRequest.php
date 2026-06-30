@@ -18,6 +18,7 @@ class RecipeFormRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'original_source' => ['nullable', 'url', 'max:2048'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'ingredients' => ['required', 'array', 'min:1'],

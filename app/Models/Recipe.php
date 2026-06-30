@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-#[Fillable(['user_id', 'title', 'description', 'ingredients', 'instructions'])]
+#[Fillable(['user_id', 'title', 'description', 'original_source', 'ingredients', 'instructions'])]
 class Recipe extends Model
 {
     /** @use HasFactory<RecipeFactory> */

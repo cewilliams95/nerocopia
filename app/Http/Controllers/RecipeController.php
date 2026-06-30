@@ -35,7 +35,9 @@ class RecipeController extends Controller
         $request->validate(['url' => ['required', 'url']]);
 
         try {
-            return response()->json($service->fromUrl($request->input('url')));
+            $url = $request->input('url');
+
+            return response()->json(array_merge($service->fromUrl($url), ['original_source' => $url]));
         } catch (Throwable) {
             return response()->json([
                 'message' => 'Could not extract a recipe from the provided URL.',
@@ -74,7 +76,7 @@ class RecipeController extends Controller
     /** @return array<int, array{field: string, old: string|null, new: string|null}> */
     private function expandChanges(array $attributes, array $old): array
     {
-        $excluded = ['user_id'];
+        $excluded = ['user_id', 'original_source'];
         $changes = [];
 
         foreach ($attributes as $field => $newValue) {
@@ -93,7 +95,7 @@ class RecipeController extends Controller
 
                     if ($oldItem !== $newItem) {
                         $changes[] = [
-                            'field' => $singular . ' ' . ($i + 1),
+                            'field' => $singular.' '.($i + 1),
                             'old' => $oldItem,
                             'new' => $newItem,
                         ];

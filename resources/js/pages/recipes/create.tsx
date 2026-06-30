@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 type ImportedRecipe = {
     title: string;
     description: string;
+    original_source: string;
     ingredients: string[];
     instructions: string[];
 };
@@ -16,6 +17,7 @@ export default function RecipesCreate() {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
+        original_source: '',
         ingredients: [''],
         instructions: [''],
     });
@@ -36,6 +38,7 @@ export default function RecipesCreate() {
                 setData({
                     title: recipe.title,
                     description: recipe.description,
+                    original_source: recipe.original_source,
                     ingredients: recipe.ingredients.length ? recipe.ingredients : [''],
                     instructions: recipe.instructions.length ? recipe.instructions : [''],
                 });

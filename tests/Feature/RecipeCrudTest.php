@@ -61,6 +61,39 @@ test('users can create a recipe', function () {
     expect($recipe->instructions)->toHaveCount(3);
 });
 
+test('original_source is stored when provided on create', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('recipes.store'), [
+            'title' => 'Imported Cake',
+            'description' => 'From the web.',
+            'original_source' => 'https://example.com/recipe/chocolate-cake',
+            'ingredients' => ['flour'],
+            'instructions' => ['mix'],
+        ])
+        ->assertRedirect(route('recipes.index'));
+
+    $recipe = Recipe::where('user_id', $user->id)->where('title', 'Imported Cake')->first();
+    expect($recipe->original_source)->toBe('https://example.com/recipe/chocolate-cake');
+});
+
+test('original_source is null when not provided on create', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('recipes.store'), [
+            'title' => 'Manual Cake',
+            'description' => 'Typed by hand.',
+            'ingredients' => ['flour'],
+            'instructions' => ['mix'],
+        ])
+        ->assertRedirect(route('recipes.index'));
+
+    $recipe = Recipe::where('user_id', $user->id)->where('title', 'Manual Cake')->first();
+    expect($recipe->original_source)->toBeNull();
+});
+
 test('recipe creation requires a title', function () {
     $this->actingAs(User::factory()->create())
         ->post(route('recipes.store'), [

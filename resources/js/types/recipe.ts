@@ -3,6 +3,7 @@ export type Recipe = {
     user_id: number;
     title: string;
     description: string;
+    original_source: string | null;
     ingredients: string[];
     instructions: string[];
     created_at: string;
