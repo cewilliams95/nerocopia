@@ -1,4 +1,6 @@
 import { Head, useForm, useHttp } from '@inertiajs/react';
+import { Plus, X } from 'lucide-react';
+import { useState } from 'react';
 import RecipeController from '@/actions/App/Http/Controllers/RecipeController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,7 @@ export default function RecipesCreate() {
         title: '',
         description: '',
         original_source: '',
+        tag_names: [] as string[],
         ingredients: [''],
         instructions: [''],
     });
@@ -30,6 +33,34 @@ export default function RecipesCreate() {
         errors: importErrors,
     } = useHttp({ url: '' });
 
+    const [tagInput, setTagInput] = useState('');
+
+    function addTag() {
+        const name = tagInput.trim();
+        if (!name) return;
+        const isDuplicate = data.tag_names.some(
+            (t) => t.toLowerCase() === name.toLowerCase(),
+        );
+        if (!isDuplicate) {
+            setData('tag_names', [...data.tag_names, name]);
+        }
+        setTagInput('');
+    }
+
+    function removeTag(name: string) {
+        setData(
+            'tag_names',
+            data.tag_names.filter((t) => t !== name),
+        );
+    }
+
+    function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTag();
+        }
+    }
+
     function handleImport(e: React.FormEvent) {
         e.preventDefault();
         importPost(RecipeController.importUrl.url(), {
@@ -39,6 +70,7 @@ export default function RecipesCreate() {
                     title: recipe.title,
                     description: recipe.description,
                     original_source: recipe.original_source,
+                    tag_names: data.tag_names,
                     ingredients: recipe.ingredients.length ? recipe.ingredients : [''],
                     instructions: recipe.instructions.length ? recipe.instructions : [''],
                 });
@@ -70,7 +102,7 @@ export default function RecipesCreate() {
             <Head title="New Recipe" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">New Recipe asdfasdf</h1>
+                <h1 className="text-xl font-semibold tracking-tight">New Recipe</h1>
 
                 <form onSubmit={handleImport} className="max-w-2xl">
                     <div className="flex gap-2">
@@ -116,6 +148,47 @@ export default function RecipesCreate() {
                         <InputError message={errors.description} />
                     </div>
 
+                    <div className="grid gap-2">
+                        <Label>Tags</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={handleTagKeyDown}
+                                placeholder="Add a tag…"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={addTag}
+                                aria-label="Add tag"
+                            >
+                                <Plus className="size-4" />
+                            </Button>
+                        </div>
+                        {data.tag_names.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {data.tag_names.map((name) => (
+                                    <span
+                                        key={name}
+                                        className="inline-flex items-center gap-1.5 rounded-full border bg-secondary px-3 py-1 text-sm text-secondary-foreground"
+                                    >
+                                        {name}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeTag(name)}
+                                            className="rounded-full p-0.5 hover:bg-destructive/20 hover:text-destructive"
+                                            aria-label={`Remove ${name}`}
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <div className="grid gap-3">
                         <Label>Ingredients</Label>
                         {data.ingredients.map((ingredient, index) => (
@@ -155,7 +228,7 @@ export default function RecipesCreate() {
                         {data.instructions.map((instruction, index) => (
                             <div key={index} className="flex gap-2">
                                 <div className="flex flex-1 gap-2">
-                                    <span className="mt-2 text-sm font-medium text-muted-foreground w-5 shrink-0">
+                                    <span className="mt-2 w-5 shrink-0 text-sm font-medium text-muted-foreground">
                                         {index + 1}.
                                     </span>
                                     <textarea

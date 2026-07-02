@@ -19,6 +19,8 @@ class RecipeFormRequest extends FormRequest
     {
         return [
             'original_source' => ['nullable', 'url', 'max:2048'],
+            'tag_names' => ['nullable', 'array'],
+            'tag_names.*' => ['string', 'max:50'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'ingredients' => ['required', 'array', 'min:1'],

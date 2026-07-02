@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { UtensilsCrossed } from 'lucide-react';
+import { ShoppingCart, Tag, UtensilsCrossed } from 'lucide-react';
 import RecipeController from '@/actions/App/Http/Controllers/RecipeController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -21,6 +21,16 @@ const mainNavItems: NavItem[] = [
         title: 'Recipes',
         href: RecipeController.index.url(),
         icon: UtensilsCrossed,
+    },
+    {
+        title: 'Shopping List',
+        href: '',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Tags',
+        href: '/tags',
+        icon: Tag,
     },
 ];
 

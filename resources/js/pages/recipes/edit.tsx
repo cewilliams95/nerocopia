@@ -1,4 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
+import { Plus, X } from 'lucide-react';
+import { useState } from 'react';
 import RecipeController from '@/actions/App/Http/Controllers/RecipeController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -10,9 +12,38 @@ export default function RecipesEdit({ recipe }: { recipe: Recipe }) {
     const { data, setData, put, processing, errors } = useForm({
         title: recipe.title,
         description: recipe.description,
+        tag_names: recipe.tags.map((t) => t.name),
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
     });
+
+    const [tagInput, setTagInput] = useState('');
+
+    function addTag() {
+        const name = tagInput.trim();
+        if (!name) return;
+        const isDuplicate = data.tag_names.some(
+            (t) => t.toLowerCase() === name.toLowerCase(),
+        );
+        if (!isDuplicate) {
+            setData('tag_names', [...data.tag_names, name]);
+        }
+        setTagInput('');
+    }
+
+    function removeTag(name: string) {
+        setData(
+            'tag_names',
+            data.tag_names.filter((t) => t !== name),
+        );
+    }
+
+    function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTag();
+        }
+    }
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -66,6 +97,47 @@ export default function RecipesEdit({ recipe }: { recipe: Recipe }) {
                             className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
                         />
                         <InputError message={errors.description} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>Tags</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={handleTagKeyDown}
+                                placeholder="Add a tag…"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={addTag}
+                                aria-label="Add tag"
+                            >
+                                <Plus className="size-4" />
+                            </Button>
+                        </div>
+                        {data.tag_names.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {data.tag_names.map((name) => (
+                                    <span
+                                        key={name}
+                                        className="inline-flex items-center gap-1.5 rounded-full border bg-secondary px-3 py-1 text-sm text-secondary-foreground"
+                                    >
+                                        {name}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeTag(name)}
+                                            className="rounded-full p-0.5 hover:bg-destructive/20 hover:text-destructive"
+                                            aria-label={`Remove ${name}`}
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid gap-3">

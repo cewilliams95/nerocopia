@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Activitylog\Models\Activity;
@@ -18,10 +19,21 @@ class RecipeController extends Controller
 {
     public function index(Request $request): Response
     {
-        $recipes = $request->user()->recipes()->latest()->get();
+        $recipes = $request->user()->recipes()
+            ->with('tags')
+            ->when($request->search, fn ($q, $search) => $q->where(fn ($q) => $q->where('title', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+            )
+            )
+            ->when($request->tags, fn ($q, $tags) => $q->whereHas('tags', fn ($q) => $q->whereIn('id', $tags))
+            )
+            ->latest()
+            ->get();
 
         return Inertia::render('recipes/index', [
             'recipes' => $recipes,
+            'tags' => $request->user()->tags()->orderBy('name')->get(),
+            'filters' => $request->only(['search', 'tags']),
         ]);
     }
 
@@ -48,7 +60,8 @@ class RecipeController extends Controller
 
     public function store(RecipeFormRequest $request): RedirectResponse
     {
-        $request->user()->recipes()->create($request->validated());
+        $recipe = $request->user()->recipes()->create($request->safe()->except(['tag_names']));
+        $this->syncTagNames($request, $recipe);
 
         return to_route('recipes.index');
     }
@@ -56,6 +69,8 @@ class RecipeController extends Controller
     public function show(Recipe $recipe): Response
     {
         Gate::authorize('view', $recipe);
+
+        $recipe->load('tags');
 
         $changes = Activity::forSubject($recipe)
             ->where('event', 'updated')
@@ -71,6 +86,21 @@ class RecipeController extends Controller
             'recipe' => $recipe,
             'changes' => $changes,
         ]);
+    }
+
+    private function syncTagNames(RecipeFormRequest $request, Recipe $recipe): void
+    {
+        $tagIds = collect($request->input('tag_names', []))
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->uniqueStrict(fn ($name) => Str::lower($name))
+            ->map(fn ($name) => $request->user()->tags()->firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name],
+            )->id)
+            ->toArray();
+
+        $recipe->tags()->sync($tagIds);
     }
 
     /** @return array<int, array{field: string, old: string|null, new: string|null}> */
@@ -118,7 +148,7 @@ class RecipeController extends Controller
         Gate::authorize('update', $recipe);
 
         return Inertia::render('recipes/edit', [
-            'recipe' => $recipe,
+            'recipe' => $recipe->load('tags'),
         ]);
     }
 
@@ -126,7 +156,8 @@ class RecipeController extends Controller
     {
         Gate::authorize('update', $recipe);
 
-        $recipe->update($request->validated());
+        $recipe->update($request->safe()->except(['tag_names']));
+        $this->syncTagNames($request, $recipe);
 
         return to_route('recipes.index');
     }

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import RecipeController from '@/actions/App/Http/Controllers/RecipeController';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Changes } from '@/types/changes';
 import type { Recipe } from '@/types/recipe';
@@ -42,6 +43,16 @@ export default function RecipesShow({ recipe, changes }: ShowProps) {
                 </div>
 
                 <p className="text-muted-foreground">{recipe.description}</p>
+
+                {recipe.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {recipe.tags.map((tag) => (
+                            <Badge key={tag.id} variant="secondary">
+                                {tag.name}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
 
                 {recipe.original_source && (
                     <p className="text-sm text-muted-foreground">
