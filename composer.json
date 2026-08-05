@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "nerocopia/nerocopia",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Nerocopia is a recipe management application built with Laravel and React.",
     "keywords": [
         "laravel",
         "framework"
