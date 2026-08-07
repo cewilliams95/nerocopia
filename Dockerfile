@@ -45,4 +45,7 @@ USER www-data
 
 EXPOSE 9000
 
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=5 \
+    CMD php -r '$c=@fsockopen("127.0.0.1",9000,$e,$s,1);if(!$c){exit(1);}fclose($c);'
+
 CMD ["php-fpm"]
