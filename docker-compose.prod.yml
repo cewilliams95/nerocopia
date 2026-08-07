@@ -47,7 +47,7 @@ services:
         condition: service_completed_successfully
 
   db:
-    image: mysql:8
+    image: mysql:8.4
     restart: unless-stopped
     env_file:
       - .env.prod
