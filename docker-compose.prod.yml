@@ -1,9 +1,6 @@
 services:
   migrate:
-    build:
-      context: .
-      target: app
-    image: nerocopia:app
+    image: ghcr.io/cewilliams95/nerocopia:latest
     restart: "no"
     command: php artisan migrate --force
     env_file:
@@ -15,10 +12,7 @@ services:
         condition: service_healthy
 
   app:
-    build:
-      context: .
-      target: app
-    image: nerocopia:app
+    image: ghcr.io/cewilliams95/nerocopia:latest
     restart: unless-stopped
     env_file:
       - .env.prod
@@ -29,10 +23,7 @@ services:
         condition: service_completed_successfully
 
   queue:
-    build:
-      context: .
-      target: app
-    image: nerocopia:app
+    image: ghcr.io/cewilliams95/nerocopia:latest
     restart: unless-stopped
     command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
     env_file:
@@ -44,10 +35,7 @@ services:
         condition: service_completed_successfully
 
   scheduler:
-    build:
-      context: .
-      target: app
-    image: nerocopia:app
+    image: ghcr.io/cewilliams95/nerocopia:latest
     restart: unless-stopped
     command: php artisan schedule:work
     env_file:
