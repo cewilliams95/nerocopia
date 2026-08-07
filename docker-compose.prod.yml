@@ -59,6 +59,33 @@ services:
       timeout: 5s
       retries: 5
 
+  backup:
+    image: mysql:8.4
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    volumes:
+      - db_backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh"]
+    command:
+      - -c
+      - |
+        while true; do
+          ts=$$(date +%Y%m%d_%H%M%S)
+          dbname="$$MYSQL_DATABASE"
+          echo "[backup] dumping $$dbname at $$ts"
+          mysqldump -h db -u root -p"$$MYSQL_ROOT_PASSWORD" \
+            --single-transaction --routines --triggers "$$dbname" \
+            | gzip > "/backups/$${dbname}_$${ts}.sql.gz"
+          find /backups -name '*.sql.gz' -mtime +14 -delete
+          echo "[backup] done, sleeping 24h"
+          sleep 86400
+        done
+
 volumes:
   db_data:
+  db_backups:
   storage:
