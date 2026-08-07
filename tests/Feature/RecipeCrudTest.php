@@ -2,9 +2,6 @@
 
 use App\Models\Recipe;
 use App\Models\User;
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-
-uses(LazilyRefreshDatabase::class);
 
 test('guests are redirected from recipes index', function () {
     $this->get(route('recipes.index'))->assertRedirect(route('login'));

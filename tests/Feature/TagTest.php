@@ -3,9 +3,6 @@
 use App\Models\Recipe;
 use App\Models\Tag;
 use App\Models\User;
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-
-uses(LazilyRefreshDatabase::class);
 
 test('authenticated users can view their tags', function () {
     $user = User::factory()->create();

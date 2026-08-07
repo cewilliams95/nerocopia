@@ -2,10 +2,7 @@
 
 use App\Models\User;
 use App\Services\RecipeImportService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-
-uses(RefreshDatabase::class);
 
 function makeHtmlWithJsonLd(array $schema): string
 {
