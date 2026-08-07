@@ -46,6 +46,29 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  assets:
+    image: ghcr.io/cewilliams95/nerocopia:latest
+    restart: "no"
+    user: "root"
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "cp -a /var/www/html/public/. /shared-public/"]
+    volumes:
+      - public_assets:/shared-public
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - public_assets:/var/www/html/public:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_started
+      assets:
+        condition: service_completed_successfully
+
   db:
     image: mysql:8.4
     restart: unless-stopped
@@ -89,3 +112,4 @@ volumes:
   db_data:
   db_backups:
   storage:
+  public_assets:
